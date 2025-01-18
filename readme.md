@@ -6,6 +6,20 @@ This was built for WordPress (a PHP application). It is useful for any PHP appli
 
 If your PHP application does not serve static files, you should strongly consider using https://kubernetes.github.io/ingress-nginx/user-guide/fcgi-services/. You will be able to pass traffic directly from your NGINX ingress controller to your FastCGI server.
 
+### WordPress only consideration
+
+This setup acts as a reverse proxy, where NGINX ingress handles the SSL termination and passes the traffic an NGINX web server without SSL.
+
+See: https://developer.wordpress.org/advanced-administration/security/https/#using-a-reverse-proxy
+
+If you do not add this snippet to WordPress, you will encounter a redirect loop.
+
+```php
+define('FORCE_SSL_ADMIN', true);
+if (strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false)
+    $_SERVER['HTTPS'] = 'on';
+```
+
 ## Usage
 
 Before running `./scripts/buildAndPublish.sh`
