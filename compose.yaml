@@ -1,0 +1,19 @@
+services:
+  nginx:
+    image: example-nginx
+    build:
+      context: .
+      dockerfile: ./docker/nginx/dockerfile
+    volumes:
+      - ./html:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+      - 443:443
+  fpm:
+    image: example-fpm
+    build:
+      context: .
+      dockerfile: ./docker/fpm/dockerfile
+    volumes:
+      - ./html:/var/www/html

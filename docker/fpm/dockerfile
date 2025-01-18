@@ -1,0 +1,14 @@
+FROM php:7.4-fpm-alpine
+
+WORKDIR /var/www/html
+
+# mlocati/php-extension-installer is a Docker image that contains a script
+# which can install PHP extensions, such as pdo_mysql, from the command line.
+# We copy that script into this image so that we can run it in the RUN
+# command below.
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+RUN install-php-extensions pdo_mysql mysqli
+
+COPY ../../html /var/www/html
+
+EXPOSE 9000

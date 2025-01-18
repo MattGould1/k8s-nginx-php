@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+# This is a Deployment, which is a way to manage a set of replica Pods.
+# More information: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+kind: Deployment
+metadata:
+  name: example-site
+spec:
+  # The selector field defines how the Deployment finds which Pods to manage.
+  # In this case, you simply select a label that is defined in the Pod template
+  # (app: example-site).
+  selector:
+    matchLabels:
+      app: example-site
+  # The number of replica Pods that the Deployment should create and manage.
+  # If the Pods are deleted or terminated, the Deployment will create new ones
+  # to replace them and maintain the desired number of replicas.
+  replicas: 2
+  # The template field defines the structure of the Pod that the Deployment
+  # is managing. This Pod has a single container running the
+  # example-fpm Docker image.
+  template:
+    metadata:
+      labels:
+        app: example-site
+    spec:
+      containers:
+        - name: example-site
+          image: XXXFPM_IMAGEXXX
+          ports:
+            - containerPort: 9000
+              name: fastcgi
+          imagePullPolicy: Always
+          env:
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: example-secret
+                  key: SECRET
+        - name: example-nginx
+          image: XXXNGINX_IMAGEXXX
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config-volume
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config-volume
+          configMap:
+            name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+spec:
+  selector:
+    app: example-site
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      name: nginx
